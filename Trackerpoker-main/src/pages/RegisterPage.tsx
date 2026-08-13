@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { UserPlus, Spade, AtSign, Mail, Lock } from 'lucide-react';
+import { UserPlus, Spade, AlertCircle, AtSign, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { slugify, checkRegistryHealth, type RegistryHealth } from '@/services/registry/client';
@@ -9,6 +9,7 @@ import {
 import { toUserFacingError } from '@/lib/userFacingError';
 import { ConnectSheetStep } from '@/pages/ConnectSheetStep';
 import { RecoveryCodePanel } from '@/components/auth/RecoveryCodePanel';
+import { AuthBackLink } from '@/components/auth/AuthBackLink';
 
 export function RegisterPage() {
   const { registerAccount, loading, user, needsSheet } = useAuth();
@@ -72,6 +73,7 @@ export function RegisterPage() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg animate-fade-up">
+          <AuthBackLink />
           <div className="text-center mb-8">
             <h1 className="font-display text-2xl font-bold">Paso 2 de 3 — código de recuperación</h1>
             <p className="text-sm text-ink-300 mt-2">Quedó guardado en el Sheet maestro. Copialo si querés tenerlo a mano.</p>
@@ -97,6 +99,7 @@ export function RegisterPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg animate-fade-up">
+        <AuthBackLink />
         <div className="text-center mb-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand/10 border border-brand/20 mb-4">
             <Spade className="h-7 w-7 text-brand" strokeWidth={2} />
@@ -204,7 +207,7 @@ export function RegisterPage() {
 
         <p className="text-sm text-ink-300 mt-6 text-center">
           ¿Ya tenés cuenta?{' '}
-          <button onClick={() => navigate('/login')} className="text-brand hover:underline">
+          <button type="button" onClick={() => navigate('/')} className="text-brand hover:underline">
             Iniciar sesión
           </button>
         </p>

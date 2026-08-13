@@ -4,6 +4,7 @@ import { useAuth, profilePath } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { ConnectSheetStep } from '@/pages/ConnectSheetStep';
 import { validatePasswordClient } from '@/lib/validation';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 export function LoginPage() {
   const { login, loading, needsSheet, user } = useAuth();
@@ -35,7 +36,7 @@ export function LoginPage() {
       }
       navigate(profilePath(loggedIn.slug));
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
+      setError(toUserFacingError(err, 'Error al iniciar sesión'));
     }
   };
 
@@ -116,7 +117,7 @@ export function LoginPage() {
 
         <p className="text-sm text-ink-300 mt-6 text-center">
           ¿No tenés cuenta?{' '}
-          <button onClick={() => navigate('/')} className="text-brand hover:underline">
+          <button type="button" onClick={() => navigate('/register')} className="text-brand hover:underline">
             Crear cuenta
           </button>
         </p>

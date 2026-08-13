@@ -6,6 +6,8 @@ import { checkSheetWriteAccessFromBackend } from '@/services/sheets/backendApi';
 import { parseSpreadsheetId } from '@/services/sheets/parseUrl';
 import { isSheetPermissionError } from '@/lib/sheetErrors';
 import { missingServiceAccountMessage } from '@/lib/serviceAccount';
+import { AuthBackLink } from '@/components/auth/AuthBackLink';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 type Props = {
   username: string;
@@ -37,7 +39,7 @@ export function ConnectSheetStep({ username, onDone }: Props) {
       setVerifyState('ok');
       setVerifyMessage('Permisos OK — la app puede leer y escribir en tu Sheet.');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Sin acceso al Sheet';
+      const message = toUserFacingError(err, 'Sin acceso al Sheet');
       setVerifyState('fail');
       setVerifyMessage(
         isSheetPermissionError(message)
@@ -73,6 +75,7 @@ export function ConnectSheetStep({ username, onDone }: Props) {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg animate-fade-up">
+        <AuthBackLink />
         <div className="text-center mb-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand/10 border border-brand/20 mb-4">
             <Spade className="h-7 w-7 text-brand" strokeWidth={2} />

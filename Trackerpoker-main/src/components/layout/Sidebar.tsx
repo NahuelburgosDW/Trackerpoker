@@ -59,7 +59,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           </>
         ) : (
           <>
-            <button onClick={() => go('/login')} className="nav-link w-full">
+            <button onClick={() => go('/')} className="nav-link w-full">
               <LogIn className="h-[18px] w-[18px]" strokeWidth={2} />
               <span>Iniciar sesión</span>
             </button>

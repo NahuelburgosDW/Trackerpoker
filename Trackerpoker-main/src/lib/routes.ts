@@ -4,11 +4,15 @@ export function parsePublicSlug(path: string): string | null {
 }
 
 export function isRegisterPage(path: string) {
-  return path === '/' || path === '/register';
+  return path === '/register';
+}
+
+export function isLoginPage(path: string) {
+  return path === '/' || path === '/login';
 }
 
 export function isAuthPage(path: string) {
-  return isRegisterPage(path) || path === '/login' || path === '/forgot-password';
+  return isLoginPage(path) || isRegisterPage(path) || path === '/forgot-password';
 }
 
 export function isOwnProfile(path: string, slug: string | undefined) {

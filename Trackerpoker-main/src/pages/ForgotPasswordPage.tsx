@@ -3,6 +3,8 @@ import { KeyRound, Spade, AlertCircle, AtSign, Lock, Shield } from 'lucide-react
 import { useRouter } from '@/lib/router';
 import { resetPassword } from '@/services/registry/client';
 import { validatePasswordClient, validateRecoveryCodeClient } from '@/lib/validation';
+import { AuthBackLink } from '@/components/auth/AuthBackLink';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 export function ForgotPasswordPage() {
   const { navigate } = useRouter();
@@ -38,7 +40,7 @@ export function ForgotPasswordPage() {
       await resetPassword(identifier, recoveryCode, password);
       setDone(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al restablecer la contraseña');
+      setError(toUserFacingError(err, 'Error al restablecer la contraseña'));
     } finally {
       setLoading(false);
     }
@@ -47,13 +49,14 @@ export function ForgotPasswordPage() {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-md animate-fade-up">
+        <AuthBackLink />
         <div className="text-center mb-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand/10 border border-brand/20 mb-4">
             <Spade className="h-7 w-7 text-brand" strokeWidth={2} />
           </div>
           <h1 className="font-display text-2xl font-bold">Recuperar contraseña</h1>
           <p className="text-sm text-ink-300 mt-2">
-            Usá el código de la columna <span className="text-ink-100">recoveryCode</span> en el Sheet maestro
+            Usá el código de recuperación que guardaste al crear la cuenta
           </p>
         </div>
 
@@ -63,7 +66,7 @@ export function ForgotPasswordPage() {
               <KeyRound className="h-6 w-6 text-brand" />
             </div>
             <p className="text-sm text-ink-100">Contraseña actualizada. Ya podés iniciar sesión.</p>
-            <button onClick={() => navigate('/login')} className="btn-primary w-full">
+            <button type="button" onClick={() => navigate('/')} className="btn-primary w-full">
               Ir a iniciar sesión
             </button>
           </div>
@@ -155,7 +158,7 @@ export function ForgotPasswordPage() {
         )}
 
         <p className="text-sm text-ink-300 mt-6 text-center">
-          <button onClick={() => navigate('/login')} className="text-brand hover:underline">
+          <button type="button" onClick={() => navigate('/')} className="text-brand hover:underline">
             Volver a iniciar sesión
           </button>
         </p>

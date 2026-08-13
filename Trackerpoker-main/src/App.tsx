@@ -16,7 +16,7 @@ import { AdminTournaments } from '@/pages/admin/AdminTournaments';
 import { AdminProfile } from '@/pages/admin/AdminProfile';
 import { HandsPage } from '@/pages/HandsPage';
 import { DataStatusBar } from '@/components/ui/DataStatusBar';
-import { parsePublicSlug, isAuthPage, isRegisterPage } from '@/lib/routes';
+import { parsePublicSlug, isAuthPage, isLoginPage, isRegisterPage } from '@/lib/routes';
 import { needsSheetConnection } from '@/lib/auth';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
@@ -32,8 +32,13 @@ function AppShell() {
   const showAdminLayout = isAdminArea && isAuthenticated;
 
   useEffect(() => {
-    if (path === '/register') {
+    // /login → inicio (/)
+    if (path === '/login') {
       navigate('/');
+      return;
+    }
+    if (isLoginPage(path) && isAuthenticated && user && !needsSheetConnection(user)) {
+      navigate(profilePath(user.slug));
       return;
     }
     if (isRegisterPage(path) && isAuthenticated && user && !needsSheetConnection(user)) {
@@ -41,13 +46,10 @@ function AppShell() {
       return;
     }
     if (isProtectedAdminPath(path) && !isAuthenticated) {
-      navigate('/login');
+      navigate('/');
     }
     if (path === '/hands' && !isAuthenticated) {
-      navigate('/login');
-    }
-    if (path === '/login' && isAuthenticated && user && !needsSheetConnection(user)) {
-      navigate(profilePath(user.slug));
+      navigate('/');
     }
     if (path === '/forgot-password' && isAuthenticated && user && !needsSheetConnection(user)) {
       navigate(profilePath(user.slug));
@@ -58,7 +60,13 @@ function AppShell() {
     return (
       <div className="flex min-h-screen flex-col bg-ink-900">
         <Topbar variant="login" />
-        {path === '/login' ? <LoginPage /> : path === '/forgot-password' ? <ForgotPasswordPage /> : <RegisterPage />}
+        {isLoginPage(path) ? (
+          <LoginPage />
+        ) : path === '/forgot-password' ? (
+          <ForgotPasswordPage />
+        ) : (
+          <RegisterPage />
+        )}
       </div>
     );
   }

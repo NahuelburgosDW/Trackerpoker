@@ -14,12 +14,12 @@ export function Topbar({ onMenu, variant = 'public', publicSlug }: Props) {
 
   const pageTitle = (() => {
     if (publicSlug) return `@${publicSlug}`;
-    if (path === '/') return 'Crear perfil';
-    if (path === '/register') return 'Crear perfil';
+    if (path === '/' || path === '/login') return 'Iniciar sesión';
+    if (path === '/register') return 'Crear cuenta';
+    if (path === '/forgot-password') return 'Recuperar contraseña';
     if (path === '/results') return 'Resultados';
     if (path === '/statistics') return 'Estadísticas';
     if (path === '/hands') return 'Manos clave';
-    if (path === '/login') return 'Iniciar sesión';
     if (path === '/admin/import') return 'Importar';
     if (path === '/admin/tournaments') return 'Torneos';
     if (path === '/admin/profile') return 'Editar perfil';
@@ -28,7 +28,9 @@ export function Topbar({ onMenu, variant = 'public', publicSlug }: Props) {
 
   const subtitle = (() => {
     if (variant === 'login') {
-      return path === '/login' ? 'Accedé a tu cuenta' : 'Creá tu perfil de poker';
+      if (path === '/register') return 'Creá tu perfil de poker';
+      if (path === '/forgot-password') return 'Restablecé tu acceso';
+      return 'Accedé a tu cuenta';
     }
     if (variant === 'admin') return 'Panel administrativo';
     return 'Perfil público del jugador';
