@@ -131,7 +131,7 @@ export function AdminDashboard() {
             <p className="text-2xs text-ink-300">
               {sheetsConnected
                 ? 'Los datos se leen y escriben desde tu spreadsheet.'
-                : 'Configurá VITE_SHEETS_API_URL en .env para conectar.'}
+                : 'Vinculá tu Google Sheet desde el perfil para sincronizar datos.'}
             </p>
           </div>
         </div>

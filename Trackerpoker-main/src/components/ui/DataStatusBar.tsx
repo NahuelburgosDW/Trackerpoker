@@ -3,6 +3,7 @@ import { useAppData } from '@/hooks/useAppData';
 import { formatDate } from '@/lib/format';
 import { SheetShareInstructions } from '@/components/ui/SheetShareInstructions';
 import { SERVICE_ACCOUNT_EMAIL } from '@/lib/serviceAccount';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 export function DataStatusBar() {
   const { source, error, errorKind, meta, loading, refetch } = useAppData();
@@ -39,7 +40,7 @@ export function DataStatusBar() {
       <div className="flex items-center justify-between gap-3 border-b border-loss/20 bg-loss/10 px-4 py-2 text-sm text-loss md:px-6">
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-          <span>No se pudo conectar a Google Sheets. {error}</span>
+          <span>{toUserFacingError(error, 'No se pudieron cargar los datos. Intentá de nuevo más tarde.')}</span>
         </div>
         <button onClick={() => refetch()} className="btn-ghost text-xs py-1 px-2">
           <RefreshCw className="h-3.5 w-3.5" />

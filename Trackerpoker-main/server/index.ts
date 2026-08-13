@@ -46,9 +46,10 @@ app.use(express.json({ limit: '25mb' }));
 
 app.get('/api/health', async (_req, res) => {
   if (!isServerConfigured()) {
+    console.error('Health: backend sin MASTER_SHEET_ID o credenciales Google');
     res.status(503).json({
       ok: false,
-      error: 'Backend no configurado — definí MASTER_SHEET_ID y GOOGLE_SERVICE_ACCOUNT_JSON (o GOOGLE_APPLICATION_CREDENTIALS)',
+      error: 'Servicio temporalmente no disponible',
     });
     return;
   }
@@ -65,9 +66,10 @@ app.get('/api/health', async (_req, res) => {
       serviceAccountEmail: getServiceAccountEmail(),
     });
   } catch (err) {
+    console.error('Health: error Sheet maestro', err);
     res.status(500).json({
       ok: false,
-      error: err instanceof Error ? err.message : 'Error conectando al Sheet maestro',
+      error: 'Servicio temporalmente no disponible',
     });
   }
 });

@@ -15,6 +15,7 @@ import { useRouter } from '@/lib/router';
 import { parsePublicSlug } from '@/lib/routes';
 import { EMPTY_PLAYER, playerFromSheetOrUser, requireSheetId } from '@/lib/sheetData';
 import { isSheetPermissionError } from '@/lib/sheetErrors';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 type ErrorKind = 'sheet-permission' | 'generic' | null;
 
@@ -119,8 +120,13 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Error al cargar datos';
-      setError(message);
-      setErrorKind(isSheetPermissionError(message) ? 'sheet-permission' : 'generic');
+      const kind = isSheetPermissionError(message) ? 'sheet-permission' : 'generic';
+      setErrorKind(kind);
+      setError(
+        kind === 'sheet-permission'
+          ? message
+          : toUserFacingError(message, 'No se pudieron cargar los datos. Intentá de nuevo más tarde.'),
+      );
       setPlayer(playerFromSheetOrUser(null, user, viewSlug));
       setTournaments([]);
       setHands([]);

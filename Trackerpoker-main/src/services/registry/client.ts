@@ -1,5 +1,6 @@
 import type { LinkPokerSheetPayload, RegisterAccountPayload, RegisterAccountResult, RegistryUser } from '@/services/registry/types';
 import { apiFetch } from '@/lib/apiFetch';
+import { toUserFacingError } from '@/lib/userFacingError';
 
 export type RegistryHealth = {
   ok: boolean;
@@ -20,16 +21,14 @@ export async function checkRegistryHealth(): Promise<RegistryHealth> {
 
     return {
       ok: true,
-      message: `API conectada al Sheet maestro (${json.usersCount ?? 0} usuarios)`,
+      message: 'Servicio listo',
       usersTab: json.usersTab,
       usersCount: json.usersCount,
     };
   } catch (err) {
     return {
       ok: false,
-      message: err instanceof Error
-        ? err.message
-        : 'API no disponible — ejecutá npm run dev',
+      message: toUserFacingError(err, 'El servicio no está disponible ahora. Intentá de nuevo más tarde.'),
     };
   }
 }

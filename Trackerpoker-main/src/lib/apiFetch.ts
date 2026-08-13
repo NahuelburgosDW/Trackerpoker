@@ -1,7 +1,25 @@
+import { toUserFacingError } from '@/lib/userFacingError';
+
 /** Base URL del backend. Vacío = same-origin `/api` (Vite proxy en local). */
 const API_BASE = String(import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 export type ApiResult<T> = { ok: boolean; error?: string } & T;
+
+function userApiError(status?: number): string {
+  if (status === 413) {
+    return 'El archivo es demasiado grande para importar de una vez. Probá con menos TXT.';
+  }
+  if (status === 503 || status === 502 || status === 504) {
+    return 'El servicio no está disponible ahora. Intentá de nuevo más tarde.';
+  }
+  if (status && status >= 500) {
+    return 'Error interno del servidor. Intentá de nuevo más tarde.';
+  }
+  if (status === 404) {
+    return 'El servicio no está disponible ahora. Intentá de nuevo más tarde.';
+  }
+  return 'No se pudo conectar con el servidor. Intentá de nuevo más tarde.';
+}
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<ApiResult<T>> {
   const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
@@ -16,36 +34,26 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
       },
     });
   } catch {
-    throw new Error(
-      API_BASE
-        ? `API no disponible (${API_BASE}) — verificá Railway / VITE_API_URL`
-        : 'API no disponible — ejecutá npm run dev (frontend + backend juntos)',
-    );
+    throw new Error(userApiError());
   }
 
   const text = await res.text();
   if (res.status === 413) {
-    throw new Error('El archivo es demasiado grande para importar de una vez. Probá con menos TXT o reiniciá el servidor.');
+    throw new Error(userApiError(413));
   }
   if (!text.trim()) {
-    throw new Error(
-      `API sin respuesta (HTTP ${res.status}) — verificá que el backend esté corriendo`,
-    );
+    throw new Error(userApiError(res.status));
   }
 
   let json: ApiResult<T>;
   try {
     json = JSON.parse(text) as ApiResult<T>;
   } catch {
-    throw new Error(
-      res.status >= 400
-        ? `Error del servidor (HTTP ${res.status}).`
-        : `Respuesta inválida del servidor (HTTP ${res.status})`,
-    );
+    throw new Error(userApiError(res.status));
   }
 
   if (!json.ok) {
-    throw new Error(json.error || `Error HTTP ${res.status}`);
+    throw new Error(toUserFacingError(json.error || userApiError(res.status), userApiError(res.status)));
   }
 
   return json;

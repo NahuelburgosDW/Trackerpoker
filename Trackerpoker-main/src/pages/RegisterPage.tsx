@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { UserPlus, Spade, AlertCircle, CheckCircle2, Loader2, AtSign, Mail, Lock } from 'lucide-react';
+import { UserPlus, Spade, AtSign, Mail, Lock } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from '@/lib/router';
 import { slugify, checkRegistryHealth, type RegistryHealth } from '@/services/registry/client';
 import {
   validateEmailClient, validatePasswordClient, validateUsernameClient,
 } from '@/lib/validation';
+import { toUserFacingError } from '@/lib/userFacingError';
 import { ConnectSheetStep } from '@/pages/ConnectSheetStep';
 import { RecoveryCodePanel } from '@/components/auth/RecoveryCodePanel';
 
@@ -63,7 +64,7 @@ export function RegisterPage() {
       setRecoveryCode(result.recoveryCode);
       setStep('recovery');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error al crear cuenta');
+      setError(toUserFacingError(err, 'No se pudo crear la cuenta. Intentá de nuevo más tarde.'));
     }
   };
 
@@ -104,32 +105,11 @@ export function RegisterPage() {
           <p className="text-sm text-ink-300 mt-2">Paso 1 de 3 — tus datos de acceso</p>
         </div>
 
-        <div className={`card p-4 mb-4 text-sm ${registryOk ? 'border-brand/20 bg-brand/5' : 'border-gold/20 bg-gold/5'}`}>
-          <div className="flex items-start gap-2">
-            {checkingRegistry ? (
-              <Loader2 className="h-4 w-4 mt-0.5 animate-spin text-ink-300 flex-shrink-0" />
-            ) : registryOk ? (
-              <CheckCircle2 className="h-4 w-4 mt-0.5 text-brand flex-shrink-0" />
-            ) : (
-              <AlertCircle className="h-4 w-4 mt-0.5 text-gold flex-shrink-0" />
-            )}
-            <div>
-              <p className="font-medium text-ink-100">
-                {checkingRegistry ? 'Verificando API...' : registryOk ? 'API conectada' : 'API no disponible'}
-              </p>
-              {!checkingRegistry && registry && (
-                <p className="text-2xs text-ink-300 mt-1">{registry.message}</p>
-              )}
-              {!checkingRegistry && !registryOk && (
-                <ol className="text-2xs text-ink-400 mt-2 space-y-1 list-decimal list-inside">
-                  <li>Configurá MASTER_SHEET_ID y GOOGLE_APPLICATION_CREDENTIALS en .env</li>
-                  <li>Compartí el Sheet maestro con la service account (Editor)</li>
-                  <li>Ejecutá npm run dev (web + API juntos)</li>
-                </ol>
-              )}
-            </div>
-          </div>
-        </div>
+        {!checkingRegistry && !registryOk && (
+          <p className="mb-4 text-sm text-ink-300 text-center">
+            El servicio no está disponible ahora. Intentá de nuevo más tarde.
+          </p>
+        )}
 
         <form onSubmit={handleCreateAccount} className="card p-6 space-y-4">
           <div>
