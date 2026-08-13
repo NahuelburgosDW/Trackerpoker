@@ -15,14 +15,40 @@ import {
 
 const app = express();
 
-app.use(cors({ origin: true }));
+const localhostOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'http://localhost:4173',
+  'http://127.0.0.1:4173',
+];
+
+const allowedOrigins = new Set([
+  ...localhostOrigins,
+  ...config.frontendOrigins,
+]);
+
+app.use(cors({
+  origin(origin, callback) {
+    // Requests sin Origin (health checks, curl, same-origin server-side)
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+    if (allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(null, false);
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '25mb' }));
 
 app.get('/api/health', async (_req, res) => {
   if (!isServerConfigured()) {
     res.status(503).json({
       ok: false,
-      error: 'Backend no configurado — definí MASTER_SHEET_ID y GOOGLE_APPLICATION_CREDENTIALS en .env',
+      error: 'Backend no configurado — definí MASTER_SHEET_ID y GOOGLE_SERVICE_ACCOUNT_JSON (o GOOGLE_APPLICATION_CREDENTIALS)',
     });
     return;
   }
@@ -259,8 +285,13 @@ app.use((err: unknown, _req: express.Request, res: express.Response, next: expre
 });
 
 app.listen(config.port, () => {
-  console.log(`PokerTracker API → http://localhost:${config.port}`);
+  console.log(`PokerTracker API → puerto ${config.port}`);
+  if (config.frontendOrigins.length > 0) {
+    console.log(`CORS frontend: ${config.frontendOrigins.join(', ')}`);
+  }
   if (!isServerConfigured()) {
-    console.warn('⚠️  Configurá MASTER_SHEET_ID y GOOGLE_APPLICATION_CREDENTIALS en .env');
+    console.warn(
+      '⚠️  Configurá MASTER_SHEET_ID y GOOGLE_SERVICE_ACCOUNT_JSON (o GOOGLE_APPLICATION_CREDENTIALS)',
+    );
   }
 });

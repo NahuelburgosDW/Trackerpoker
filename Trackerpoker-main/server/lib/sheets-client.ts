@@ -5,22 +5,34 @@ import { config } from '../config.js';
 let sheetsApi: ReturnType<typeof google.sheets> | null = null;
 let serviceAccountEmail: string | null = null;
 
+type ServiceAccountCreds = {
+  client_email: string;
+  private_key: string;
+};
+
+function loadServiceAccountCredentials(): ServiceAccountCreds {
+  if (config.googleServiceAccountJson.trim()) {
+    return JSON.parse(config.googleServiceAccountJson) as ServiceAccountCreds;
+  }
+  if (!config.googleCredentialsPath) {
+    throw new Error(
+      'Faltan credenciales de Google — definí GOOGLE_SERVICE_ACCOUNT_JSON o GOOGLE_APPLICATION_CREDENTIALS',
+    );
+  }
+  const raw = readFileSync(config.googleCredentialsPath, 'utf8');
+  return JSON.parse(raw) as ServiceAccountCreds;
+}
+
 export function getServiceAccountEmail(): string {
   if (serviceAccountEmail) return serviceAccountEmail;
-  const raw = readFileSync(config.googleCredentialsPath, 'utf8');
-  serviceAccountEmail = (JSON.parse(raw) as { client_email: string }).client_email;
+  serviceAccountEmail = loadServiceAccountCredentials().client_email;
   return serviceAccountEmail!;
 }
 
 export function getSheetsClient() {
   if (sheetsApi) return sheetsApi;
 
-  const raw = readFileSync(config.googleCredentialsPath, 'utf8');
-  const credentials = JSON.parse(raw) as {
-    client_email: string;
-    private_key: string;
-  };
-
+  const credentials = loadServiceAccountCredentials();
   serviceAccountEmail = credentials.client_email;
 
   const auth = new google.auth.JWT({

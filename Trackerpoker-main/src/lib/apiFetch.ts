@@ -1,11 +1,14 @@
-const API_BASE = import.meta.env.VITE_API_URL ?? '';
+/** Base URL del backend. Vacío = same-origin `/api` (Vite proxy en local). */
+const API_BASE = String(import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
 
 export type ApiResult<T> = { ok: boolean; error?: string } & T;
 
 export async function apiFetch<T>(path: string, options?: RequestInit): Promise<ApiResult<T>> {
+  const url = path.startsWith('http') ? path : `${API_BASE}${path.startsWith('/') ? path : `/${path}`}`;
+
   let res: Response;
   try {
-    res = await fetch(`${API_BASE}${path}`, {
+    res = await fetch(url, {
       ...options,
       headers: {
         ...(options?.body ? { 'Content-Type': 'application/json' } : {}),
@@ -13,7 +16,11 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
       },
     });
   } catch {
-    throw new Error('API no disponible — ejecutá npm run dev (frontend + backend juntos)');
+    throw new Error(
+      API_BASE
+        ? `API no disponible (${API_BASE}) — verificá Railway / VITE_API_URL`
+        : 'API no disponible — ejecutá npm run dev (frontend + backend juntos)',
+    );
   }
 
   const text = await res.text();
@@ -22,7 +29,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   }
   if (!text.trim()) {
     throw new Error(
-      `API sin respuesta (HTTP ${res.status}) — verificá que el backend esté corriendo en el puerto 3001`,
+      `API sin respuesta (HTTP ${res.status}) — verificá que el backend esté corriendo`,
     );
   }
 
@@ -32,7 +39,7 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
   } catch {
     throw new Error(
       res.status >= 400
-        ? `Error del servidor (HTTP ${res.status}). Si acabás de importar manos, reiniciá npm run dev e intentá de nuevo.`
+        ? `Error del servidor (HTTP ${res.status}).`
         : `Respuesta inválida del servidor (HTTP ${res.status})`,
     );
   }
