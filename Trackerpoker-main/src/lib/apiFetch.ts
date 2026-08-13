@@ -1,7 +1,12 @@
 import { toUserFacingError } from '@/lib/userFacingError';
 
-/** Base URL del backend. Vacío = same-origin `/api` (Vite proxy en local). */
-const API_BASE = String(import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '');
+/** Railway (prod). En local `npm run dev` deja vacío y usa el proxy de Vite. */
+const PRODUCTION_API_URL = 'https://trackerpoker-production.up.railway.app';
+
+const API_BASE = String(
+  import.meta.env.VITE_API_URL
+    ?? (import.meta.env.PROD ? PRODUCTION_API_URL : ''),
+).replace(/\/$/, '');
 
 export type ApiResult<T> = { ok: boolean; error?: string } & T;
 
