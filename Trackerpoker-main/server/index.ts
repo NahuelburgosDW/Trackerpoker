@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import { config, isServerConfigured } from './config.js';
 import {
   countUsers, findBySlug, linkPokerSheet, login, registerAccount,
@@ -15,21 +14,30 @@ import {
 
 const app = express();
 
-const corsOptions: cors.CorsOptions = {
-  origin: [
-    'https://tracker-two-rose.vercel.app',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    ...config.frontendOrigins.filter((o) => /^https?:\/\//i.test(o)),
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 204,
-};
+const CORS_ORIGINS = new Set([
+  'https://tracker-two-rose.vercel.app',
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  ...config.frontendOrigins.filter((o) => /^https?:\/\//i.test(o)),
+]);
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// CORS manual (preflight inclusive) — evita que Express responda OPTIONS sin headers
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin && CORS_ORIGINS.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
+
 app.use(express.json({ limit: '25mb' }));
 
 app.get('/api/health', async (_req, res) => {
@@ -276,9 +284,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, next: expre
 
 app.listen(config.port, () => {
   console.log(`PokerTracker API → puerto ${config.port}`);
-  if (config.frontendOrigins.length > 0) {
-    console.log(`CORS frontend: ${config.frontendOrigins.join(', ')}`);
-  }
+  console.log(`CORS origins: ${(corsOptions.origin as string[]).join(', ')}`);
   if (!isServerConfigured()) {
     console.warn(
       '⚠️  Configurá MASTER_SHEET_ID y GOOGLE_SERVICE_ACCOUNT_JSON (o GOOGLE_APPLICATION_CREDENTIALS)',
