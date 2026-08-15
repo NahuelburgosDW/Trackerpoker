@@ -15,21 +15,17 @@ import {
 
 const app = express();
 
-const localhostOrigins = [
+const allowedOrigins = new Set([
+  'https://tracker-two-rose.vercel.app',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:4173',
   'http://127.0.0.1:4173',
-];
-
-const allowedOrigins = new Set([
-  ...localhostOrigins,
   ...config.frontendOrigins,
 ]);
 
 app.use(cors({
   origin(origin, callback) {
-    // Requests sin Origin (health checks, curl, same-origin server-side)
     if (!origin) {
       callback(null, true);
       return;
