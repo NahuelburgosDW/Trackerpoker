@@ -284,7 +284,7 @@ app.use((err: unknown, _req: express.Request, res: express.Response, next: expre
 
 app.listen(config.port, () => {
   console.log(`PokerTracker API → puerto ${config.port}`);
-  console.log(`CORS origins: ${(corsOptions.origin as string[]).join(', ')}`);
+  console.log(`CORS origins: ${Array.from(CORS_ORIGINS).join(', ')}`);
   if (!isServerConfigured()) {
     console.warn(
       '⚠️  Configurá MASTER_SHEET_ID y GOOGLE_SERVICE_ACCOUNT_JSON (o GOOGLE_APPLICATION_CREDENTIALS)',
