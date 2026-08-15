@@ -15,29 +15,21 @@ import {
 
 const app = express();
 
-const allowedOrigins = new Set([
-  'https://tracker-two-rose.vercel.app',
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:4173',
-  'http://127.0.0.1:4173',
-  ...config.frontendOrigins,
-]);
-
-app.use(cors({
-  origin(origin, callback) {
-    if (!origin) {
-      callback(null, true);
-      return;
-    }
-    if (allowedOrigins.has(origin)) {
-      callback(null, true);
-      return;
-    }
-    callback(null, false);
-  },
+const corsOptions: cors.CorsOptions = {
+  origin: [
+    'https://tracker-two-rose.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    ...config.frontendOrigins.filter((o) => /^https?:\/\//i.test(o)),
+  ],
   credentials: true,
-}));
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '25mb' }));
 
 app.get('/api/health', async (_req, res) => {
