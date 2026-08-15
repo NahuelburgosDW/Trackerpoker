@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Link2, Spade, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Link2, Spade, AlertCircle, CheckCircle2, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
+import { useRouter } from '@/lib/router';
 import { SheetShareInstructions } from '@/components/ui/SheetShareInstructions';
 import { checkSheetWriteAccessFromBackend } from '@/services/sheets/backendApi';
 import { parseSpreadsheetId } from '@/services/sheets/parseUrl';
 import { isSheetPermissionError } from '@/lib/sheetErrors';
 import { missingServiceAccountMessage } from '@/lib/serviceAccount';
-import { AuthBackLink } from '@/components/auth/AuthBackLink';
 import { toUserFacingError } from '@/lib/userFacingError';
 
 type Props = {
@@ -17,11 +17,17 @@ type Props = {
 type VerifyState = 'idle' | 'checking' | 'ok' | 'fail';
 
 export function ConnectSheetStep({ username, onDone }: Props) {
-  const { linkPokerSheet, loading } = useAuth();
+  const { linkPokerSheet, loading, logout } = useAuth();
+  const { navigate } = useRouter();
   const [sheetUrl, setSheetUrl] = useState('');
   const [error, setError] = useState('');
   const [verifyState, setVerifyState] = useState<VerifyState>('idle');
   const [verifyMessage, setVerifyMessage] = useState('');
+
+  const handleLeave = () => {
+    logout();
+    navigate('/');
+  };
 
   const handleVerify = async () => {
     setError('');
@@ -75,14 +81,21 @@ export function ConnectSheetStep({ username, onDone }: Props) {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
       <div className="w-full max-w-lg animate-fade-up">
-        <AuthBackLink />
+        <button
+          type="button"
+          onClick={handleLeave}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-ink-300 hover:text-white transition"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Cerrar sesión y volver al inicio
+        </button>
         <div className="text-center mb-8">
           <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-brand/10 border border-brand/20 mb-4">
             <Spade className="h-7 w-7 text-brand" strokeWidth={2} />
           </div>
           <h1 className="font-display text-2xl font-bold">Conectá tu Google Sheet</h1>
           <p className="text-sm text-ink-300 mt-2">
-            Paso 3 de 3 — perfil <span className="text-brand">@{username}</span> creado
+            Obligatorio para usar la app — perfil <span className="text-brand">@{username}</span>
           </p>
         </div>
 

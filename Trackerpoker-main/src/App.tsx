@@ -1,5 +1,5 @@
 import { RouterProvider, useRouter } from '@/lib/router';
-import { AuthProvider, useAuth, isProtectedAdminPath, profilePath } from '@/lib/auth';
+import { AuthProvider, useAuth, isProtectedAdminPath, profilePath, needsSheetConnection } from '@/lib/auth';
 import { AppDataProvider, useAppData } from '@/hooks/useAppData';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
@@ -10,53 +10,99 @@ import { StatisticsPage } from '@/pages/StatisticsPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { ConnectSheetStep } from '@/pages/ConnectSheetStep';
 import { AdminDashboard } from '@/pages/admin/AdminDashboard';
 import { AdminImport } from '@/pages/admin/AdminImport';
 import { AdminTournaments } from '@/pages/admin/AdminTournaments';
 import { AdminProfile } from '@/pages/admin/AdminProfile';
 import { HandsPage } from '@/pages/HandsPage';
 import { DataStatusBar } from '@/components/ui/DataStatusBar';
-import { parsePublicSlug, isAuthPage, isLoginPage, isRegisterPage } from '@/lib/routes';
-import { needsSheetConnection } from '@/lib/auth';
+import {
+  parsePublicSlug, isAuthPage, isLoginPage, isRegisterPage, isConnectSheetPage,
+} from '@/lib/routes';
 import { useEffect, useState } from 'react';
 import { X } from 'lucide-react';
 
 function AppShell() {
   const { path, navigate } = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, needsSheet } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const isAdminArea = path.startsWith('/admin');
-  const authPage = isAuthPage(path);
   const publicSlug = parsePublicSlug(path);
-  const showAdminLayout = isAdminArea && isAuthenticated;
+  const showAdminLayout = isAdminArea && isAuthenticated && !needsSheet;
+  const mustConnectSheet = Boolean(isAuthenticated && user && needsSheet);
 
   useEffect(() => {
-    // /login → inicio (/)
     if (path === '/login') {
       navigate('/');
       return;
     }
-    if (isLoginPage(path) && isAuthenticated && user && !needsSheetConnection(user)) {
+
+    // Sin Sheet vinculado: solo /connect-sheet o /register (código de recuperación)
+    if (mustConnectSheet) {
+      if (!isConnectSheetPage(path) && !isRegisterPage(path)) {
+        navigate('/connect-sheet');
+      }
+      return;
+    }
+
+    if (isConnectSheetPage(path)) {
+      if (!isAuthenticated) {
+        navigate('/');
+        return;
+      }
+      if (user && !needsSheetConnection(user)) {
+        navigate(profilePath(user.slug));
+      }
+      return;
+    }
+
+    if (isLoginPage(path) && isAuthenticated && user) {
       navigate(profilePath(user.slug));
       return;
     }
-    if (isRegisterPage(path) && isAuthenticated && user && !needsSheetConnection(user)) {
+    if (isRegisterPage(path) && isAuthenticated && user) {
       navigate(profilePath(user.slug));
       return;
     }
     if (isProtectedAdminPath(path) && !isAuthenticated) {
       navigate('/');
+      return;
     }
     if (path === '/hands' && !isAuthenticated) {
       navigate('/');
+      return;
     }
-    if (path === '/forgot-password' && isAuthenticated && user && !needsSheetConnection(user)) {
+    if (path === '/forgot-password' && isAuthenticated && user) {
       navigate(profilePath(user.slug));
     }
-  }, [path, isAuthenticated, user, navigate]);
+  }, [path, isAuthenticated, user, mustConnectSheet, navigate]);
 
-  if (authPage) {
+  // Gate duro: sin link de Sheet no se renderiza el resto de la app
+  // /register se permite solo para mostrar el código de recuperación
+  if (mustConnectSheet && user) {
+    if (isRegisterPage(path)) {
+      return (
+        <div className="flex min-h-screen flex-col bg-ink-900">
+          <Topbar variant="login" />
+          <RegisterPage />
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex min-h-screen flex-col bg-ink-900">
+        <Topbar variant="login" />
+        <ConnectSheetStep
+          username={user.slug}
+          onDone={() => navigate(profilePath(user.slug))}
+        />
+      </div>
+    );
+  }
+
+  if (isAuthPage(path)) {
     return (
       <div className="flex min-h-screen flex-col bg-ink-900">
         <Topbar variant="login" />
@@ -64,6 +110,8 @@ function AppShell() {
           <LoginPage />
         ) : path === '/forgot-password' ? (
           <ForgotPasswordPage />
+        ) : isConnectSheetPage(path) ? (
+          <LoginPage />
         ) : (
           <RegisterPage />
         )}
@@ -106,10 +154,13 @@ function AppShell() {
 
 function Routes() {
   const { path } = useRouter();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, needsSheet } = useAuth();
   const { loading } = useAppData();
 
   const publicSlug = parsePublicSlug(path);
+
+  // Defensa extra: nunca renderizar rutas de app sin Sheet
+  if (isAuthenticated && needsSheet) return null;
 
   if (loading && !isAuthPage(path)) {
     return (

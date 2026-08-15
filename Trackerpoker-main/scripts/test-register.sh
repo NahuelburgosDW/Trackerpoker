@@ -6,7 +6,7 @@
 set -euo pipefail
 
 URL="${VITE_REGISTRY_SCRIPT_URL:-https://script.google.com/macros/s/AKfycbwIMlaknlGwPUTGtcjiYpFNwRH3g73G0e3BdndvDqI9BMrLNXpWyn-GvRn9nusID4o/exec}"
-SLUG="${1:-nahuel}"
+SLUG="${1:-demo}"
 EMAIL="${2:-test@example.com}"
 SHEET_ID="${3:-1VA-fLXpqY12A6rdFiE6Y3x1KWRoNpy8qdkAI67jOTz4}"
 
@@ -25,7 +25,7 @@ echo "→ Registrando usuario '${SLUG}'..."
 REGISTER=$(curl -sG --max-time 20 "${URL}" \
   --data-urlencode "action=registerUser" \
   --data-urlencode "email=${EMAIL}" \
-  --data-urlencode "displayName=Nahuel Test" \
+  --data-urlencode "displayName=Demo Test" \
   --data-urlencode "googleId=test-$(date +%s)" \
   --data-urlencode "slug=${SLUG}" \
   --data-urlencode "pokerSheetId=${SHEET_ID}" \

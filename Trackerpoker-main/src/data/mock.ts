@@ -17,8 +17,8 @@ export const DEFAULT_PLAYER_ID = 'player-1';
 
 export const player: Player = {
   id: DEFAULT_PLAYER_ID,
-  nickname: 'Nahuel',
-  realName: 'Nahuel Heredia',
+  nickname: 'Jugador',
+  realName: 'Demo Player',
   country: 'Argentina',
   countryCode: 'AR',
   countryFlag: '🇦🇷',
@@ -27,7 +27,7 @@ export const player: Player = {
   gameTypes: ['MTT', 'Spin & Gold'],
   startedAt: '2024-03-14',
   createdAt: '2024-03-14T00:00:00.000Z',
-  avatarInitials: 'NH',
+  avatarInitials: 'JP',
 };
 
 const FIRST = [

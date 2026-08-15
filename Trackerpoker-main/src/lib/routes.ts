@@ -11,8 +11,15 @@ export function isLoginPage(path: string) {
   return path === '/' || path === '/login';
 }
 
+export function isConnectSheetPage(path: string) {
+  return path === '/connect-sheet';
+}
+
 export function isAuthPage(path: string) {
-  return isLoginPage(path) || isRegisterPage(path) || path === '/forgot-password';
+  return isLoginPage(path)
+    || isRegisterPage(path)
+    || isConnectSheetPage(path)
+    || path === '/forgot-password';
 }
 
 export function isOwnProfile(path: string, slug: string | undefined) {

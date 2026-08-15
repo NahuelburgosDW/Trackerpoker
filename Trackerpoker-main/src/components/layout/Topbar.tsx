@@ -16,6 +16,7 @@ export function Topbar({ onMenu, variant = 'public', publicSlug }: Props) {
     if (publicSlug) return `@${publicSlug}`;
     if (path === '/' || path === '/login') return 'Iniciar sesión';
     if (path === '/register') return 'Crear cuenta';
+    if (path === '/connect-sheet') return 'Conectar Sheet';
     if (path === '/forgot-password') return 'Recuperar contraseña';
     if (path === '/results') return 'Resultados';
     if (path === '/statistics') return 'Estadísticas';
@@ -29,6 +30,7 @@ export function Topbar({ onMenu, variant = 'public', publicSlug }: Props) {
   const subtitle = (() => {
     if (variant === 'login') {
       if (path === '/register') return 'Creá tu perfil de poker';
+      if (path === '/connect-sheet') return 'Vinculá tu Google Sheet para continuar';
       if (path === '/forgot-password') return 'Restablecé tu acceso';
       return 'Accedé a tu cuenta';
     }

@@ -626,8 +626,8 @@ function setupSheet() {
 
   writePlayer_({
     id: 'player-1',
-    nickname: 'Nahuel',
-    realName: 'Nahuel Heredia',
+    nickname: 'Jugador',
+    realName: 'Demo Player',
     country: 'Argentina',
     countryCode: 'AR',
     countryFlag: '🇦🇷',
@@ -636,7 +636,7 @@ function setupSheet() {
     gameTypes: ['MTT', 'Spin & Gold'],
     startedAt: '2024-03-14',
     createdAt: new Date().toISOString(),
-    avatarInitials: 'NH',
+    avatarInitials: 'JP',
   });
 
   touchSync_();
@@ -652,7 +652,7 @@ function registerTestUser() {
   var result = registerAccount_({
     email: 'tu-email@gmail.com',
     password: 'demo1234',
-    slug: 'nahuel',
+    slug: 'demo',
     pokerSheetId: '1VA-fLXpqY12A6rdFiE6Y3x1KWRoNpy8qdkAI67jOTz4',
     pokerSheetUrl: 'https://docs.google.com/spreadsheets/d/1VA-fLXpqY12A6rdFiE6Y3x1KWRoNpy8qdkAI67jOTz4/edit',
   });

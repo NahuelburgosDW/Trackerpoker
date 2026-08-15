@@ -56,7 +56,9 @@ export function ForgotPasswordPage() {
           </div>
           <h1 className="font-display text-2xl font-bold">Recuperar contraseña</h1>
           <p className="text-sm text-ink-300 mt-2">
-            Usá el código de recuperación que guardaste al crear la cuenta
+            El código está en tu <span className="text-ink-100">Google Sheet maestro</span>
+            {' '}→ pestaña <span className="text-ink-100">Users</span>
+            {' '}→ columna <span className="text-ink-100">recoveryCode</span>
           </p>
         </div>
 
@@ -80,7 +82,7 @@ export function ForgotPasswordPage() {
                 <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
                 <input
                   className="input pl-10"
-                  placeholder="nahuel o tu@gmail.com"
+                  placeholder="usuario o tu@email.com"
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required
@@ -91,7 +93,7 @@ export function ForgotPasswordPage() {
 
             <div>
               <label className="text-2xs font-semibold uppercase tracking-wider text-ink-300 mb-1.5 block">
-                Código de recuperación
+                Código de recuperación (desde Google Sheets)
               </label>
               <div className="relative">
                 <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
@@ -104,6 +106,9 @@ export function ForgotPasswordPage() {
                   autoComplete="off"
                 />
               </div>
+              <p className="text-2xs text-ink-400 mt-1.5">
+                Abrí el Sheet maestro → Users → buscá tu fila → copiá recoveryCode
+              </p>
             </div>
 
             <div>

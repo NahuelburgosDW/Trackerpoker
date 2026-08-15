@@ -69,7 +69,7 @@ export function LoginPage() {
               <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-ink-400" />
               <input
                 className="input pl-10"
-                placeholder="nahuel o tu@gmail.com"
+                placeholder="usuario o tu@email.com"
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
                 required

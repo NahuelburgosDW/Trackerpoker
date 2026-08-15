@@ -7,7 +7,6 @@ import {
   validateEmailClient, validatePasswordClient, validateUsernameClient,
 } from '@/lib/validation';
 import { toUserFacingError } from '@/lib/userFacingError';
-import { ConnectSheetStep } from '@/pages/ConnectSheetStep';
 import { RecoveryCodePanel } from '@/components/auth/RecoveryCodePanel';
 import { AuthBackLink } from '@/components/auth/AuthBackLink';
 
@@ -15,7 +14,7 @@ export function RegisterPage() {
   const { registerAccount, loading, user, needsSheet } = useAuth();
   const { navigate } = useRouter();
 
-  const [step, setStep] = useState<'account' | 'recovery' | 'sheet'>(needsSheet && user ? 'sheet' : 'account');
+  const [step, setStep] = useState<'account' | 'recovery'>('account');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -26,8 +25,11 @@ export function RegisterPage() {
   const [checkingRegistry, setCheckingRegistry] = useState(true);
 
   useEffect(() => {
-    if (user && needsSheet && step === 'account' && !recoveryCode) setStep('sheet');
-  }, [user, needsSheet, step, recoveryCode]);
+    // Si ya tiene sesión sin Sheet y no está en el paso recovery, mandalo a conectar
+    if (user && needsSheet && step === 'account' && !recoveryCode) {
+      navigate('/connect-sheet');
+    }
+  }, [user, needsSheet, step, recoveryCode, navigate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,26 +75,18 @@ export function RegisterPage() {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
         <div className="w-full max-w-lg animate-fade-up">
-          <AuthBackLink />
           <div className="text-center mb-8">
             <h1 className="font-display text-2xl font-bold">Paso 2 de 3 — código de recuperación</h1>
-            <p className="text-sm text-ink-300 mt-2">Quedó guardado en el Sheet maestro. Copialo si querés tenerlo a mano.</p>
+            <p className="text-sm text-ink-300 mt-2">
+              Quedó guardado en el Google Sheet maestro (Users → recoveryCode). Copialo si querés tenerlo a mano.
+            </p>
           </div>
           <RecoveryCodePanel
             code={recoveryCode}
-            onContinue={() => setStep('sheet')}
+            onContinue={() => navigate('/connect-sheet')}
           />
         </div>
       </div>
-    );
-  }
-
-  if (step === 'sheet' && user) {
-    return (
-      <ConnectSheetStep
-        username={user.slug}
-        onDone={() => navigate(`/u/${user.slug}`)}
-      />
     );
   }
 
@@ -124,7 +118,7 @@ export function RegisterPage() {
               <span className="text-sm text-ink-400">/u/</span>
               <input
                 className="input flex-1"
-                placeholder="nahuel"
+                placeholder="usuario"
                 value={username}
                 onChange={(e) => setUsername(slugify(e.target.value))}
                 required
